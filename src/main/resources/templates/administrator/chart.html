@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>ECharts</title>
+    <link rel="stylesheet" th:href="@{/static/resources/layui/css/layui.css}" media="all" />
+    <script type="text/javascript" th:src="@{/static/resources/layui/layui.js}"></script>
+    <!-- 引入 echarts.js -->
+    <script th:src="@{/static/resources/js/echarts.min.js}"></script>
+</head>
+<body>
+<!-- 为ECharts准备一个具备大小（宽高）的Dom -->
+<div id="main1" style="width: 1000px;height:500px;"></div>
+<div id="main2" style="width: 1000px;height:500px;"></div>
+<div id="main3" style="width: 1000px;height:500px;"></div>
+<script type="text/javascript">
+    // 基于准备好的dom，初始化echarts实例
+    var myChart1 = echarts.init(document.getElementById('main1'));
+    var myChart2 = echarts.init(document.getElementById('main2'));
+    var myChart3 = echarts.init(document.getElementById('main3'));
+
+
+    layui.use(['form','layer','jquery'],function() {
+        console.log(layui.$.fn.jquery);
+        var $ = layui.jquery;
+
+
+        var xAxisdata=new Array();
+        var yAxisdata=new Array();
+        var xTiao=new Array();
+        var yTiao=new Array();
+        $.getJSON("/o2o/shop/chart/getcharJSON",
+            function(json){
+                for (i in json.mapZhu) {
+                    xAxisdata.push(json.mapZhu[i].product_name);
+                    yAxisdata.push(json.mapZhu[i].total_count);
+                }
+                for (i in json.mapTiao) {
+                    xTiao.push(json.mapTiao[i].order_time);
+                    yTiao.push(json.mapTiao[i].total_amount);
+                }
+                // 指定图表的配置项和数据
+                var option1 = {
+                    title: {
+                        text: 'ECharts 入门示例'
+                    },
+                    tooltip: {},
+                    legend: {
+                        data:['销量']
+                    },
+                    xAxis: {
+                        data: xAxisdata
+                    },
+                    yAxis: {},
+                    series: [{
+                        name: '销量',
+                        type: 'bar',
+                        data: yAxisdata
+                    }]
+                };
+                var option2 = {
+                    tooltip: {
+                        trigger: 'item',
+                        formatter: "{a} <br/>{b}: {c} ({d}%)"
+                    },
+                    legend: {
+                        orient: 'vertical',
+                        x: 'right',
+                    },
+                    series: [
+                        {
+                            name:'访问来源',
+                            type:'pie',
+                            selectedMode: 'single',
+                            radius: [0, '30%'],
+
+                            label: {
+                                normal: {
+                                    position: 'inner'
+                                }
+                            },
+                            labelLine: {
+                                normal: {
+                                    show: false
+                                }
+                            },
+                            data:[
+                                {value:json.mapBing[0].finish, name:'订单完成', selected:true},
+                                {value:json.mapBing[0].cancel, name:'订单取消'}
+                            ]
+                        },
+                        {
+                            name:'访问来源',
+                            type:'pie',
+                            radius: ['40%', '55%'],
+                            label: {
+                                normal: {
+                                    formatter: '{a|{a}}{abg|}\n{hr|}\n  {b|{b}：}{c}  {per|{d}%}  ',
+                                    backgroundColor: '#eee',
+                                    borderColor: '#aaa',
+                                    borderWidth: 1,
+                                    borderRadius: 4,
+                                    rich: {
+                                        a: {
+                                            color: '#999',
+                                            lineHeight: 22,
+                                            align: 'center'
+                                        },
+                                        hr: {
+                                            borderColor: '#aaa',
+                                            width: '100%',
+                                            borderWidth: 0.5,
+                                            height: 0
+                                        },
+                                        b: {
+                                            fontSize: 16,
+                                            lineHeight: 33
+                                        },
+                                        per: {
+                                            color: '#eee',
+                                            backgroundColor: '#334455',
+                                            padding: [2, 4],
+                                            borderRadius: 2
+                                        }
+                                    }
+                                }
+                            },
+                            data:[
+                                {value:json.mapBing[0].finish_pay, name:'已支付'},
+                                {value:json.mapBing[0].wait_pay, name:'待支付'},
+                                {value:json.mapBing[0].cancel, name:'已取消'}
+                            ]
+                        }
+                    ]
+                };
+                var option3 = {
+                    xAxis: {
+                        type: 'category',
+                        data: xTiao
+                    },
+                    yAxis: {
+                        type: 'value'
+                    },
+                    series: [{
+                        data: yTiao,
+                        type: 'line'
+                    }]
+                };
+
+                // 使用刚指定的配置项和数据显示图表。
+                myChart1.setOption(option1);
+                myChart2.setOption(option2);
+                myChart3.setOption(option3);
+            });
+
+    })
+</script>
+</body>
+</html>

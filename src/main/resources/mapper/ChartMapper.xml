@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.swb.o2osys.application.mapper.ChartMapper">
+    <select id="selectZhu" resultType="map">
+        SELECT product_name,SUM(product_quantity) total_count
+        FROM tb_order_detail
+        GROUP BY product_name
+    </select>
+    <select id="selectBing" resultType="map">
+        SELECT
+        SUM(IF(order_status=0,1,0)) 'finish',
+        SUM(IF(order_status=1,1,0)) 'cancel',
+        SUM(IF(pay_status=0,1,0)) 'finish_pay',
+        SUM(IF(pay_status=1,1,0)) 'wait_pay'
+        FROM tb_order
+    </select>
+    <select id="selectTiao" resultType="map">
+        SELECT DATE_FORMAT(create_time,'%Y-%m-%d') order_time,
+        SUM(order_amount) total_amount
+        FROM tb_order
+        WHERE pay_status=0
+        GROUP BY DATE_FORMAT(create_time,'%Y-%m-%d')
+    </select>
+</mapper>
